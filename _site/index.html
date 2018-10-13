@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <head>
+
+    
+    <meta charset="UTF-8">
+
+<!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Gaussian Processes | Sagarika Sharma</title>
+<meta name="generator" content="Jekyll v3.8.3" />
+<meta property="og:title" content="Gaussian Processes" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Sagarika Sharma" />
+<meta property="og:description" content="Sagarika Sharma" />
+<link rel="canonical" href="http://localhost:4000/" />
+<meta property="og:url" content="http://localhost:4000/" />
+<meta property="og:site_name" content="Gaussian Processes" />
+<script type="application/ld+json">
+{"name":"Gaussian Processes","description":"Sagarika Sharma","@type":"WebSite","url":"http://localhost:4000/","headline":"Gaussian Processes","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="/assets/css/style.css?v=">
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">Gaussian Processes</h1>
+      <h2 class="project-tagline">Sagarika Sharma</h2>
+      
+      
+        <a href="" class="btn">Download .zip</a>
+        <a href="" class="btn">Download .tar.gz</a>
+      
+    </header>
+
+    <main id="content" class="main-content" role="main">
+      <h1 id="need-for-gaussian-processes">Need For Gaussian Processes</h1>
+
+<p>We will be concerning ourselves with the case of supervised learning, in which the aim is to learn a mapping from input to output. Given a training set, the aim is to make predictions on a test point that is not part of the training data, that is we need to move from finite data to a function that gives an output for any possible input value. This can be done by adopting two approaches. In the first approach, we make some underlying assumptions about our hypothesis, like assuming our hypothesis to be linear, or quadratic etc. In simple linear regression, target and input variables can be associated with the equation <script type="math/tex">y = f(x) + \epsilon</script>, where <script type="math/tex">y</script> is the true output, f is the hypothesis, x is the input and <script type="math/tex">\epsilon \sim \mathcal{N}(0, \sigma^2)</script> from the central limit theorem as <script type="math/tex">\epsilon</script> is assumed to capture unmodeled effects or random noise. If we assume f to be a linear relationship with parameters w0 and w1, then according to Bayesian linear regression, the distribution over parameters will be updated as and when new data points are observed.  In the second approach of Gaussian Process which is a non-parametric approach, a distribution is learned over all possible hypothesis functions that fit the training data. As with all Bayesian methods, it begins with a prior distribution where higher probabilities are given to smooth functions which we consider more likely. This can be seen as imposing a preferential bias as opposed to imposing restrictive bias as in the first approach. A preference bias is an inductive where some hypothesis are preferred over others and a restriction bias is an inductive bias where the set of hypothesis considered is restricted to a smaller set. The distribution over functions is updated as data points are observed, producing the posterior distribution over functions. We make use of covariance matrix due to which the input variables close to each other will output values that are close.  A GP assumes that <script type="math/tex">p(f(x_1),…,f(x_N))</script> is jointly Gaussian, with some mean <script type="math/tex">\mu (x)</script> and covariance <script type="math/tex">\Sigma (x)</script> given by <script type="math/tex">\sum_{ij}=k(x_i,x_j)</script>, where <script type="math/tex">k</script> is a positive definite kernel function, where <script type="math/tex">x_1, x_2, ....x_N</script> are training instances.</p>
+
+<h1 id="multivariate-gaussian-distribution">Multivariate Gaussian Distribution</h1>
+
+<p>A multivariate Gaussian distribution of <script type="math/tex">N</script> random variables is defined by a mean vector of size <script type="math/tex">N</script> whose <script type="math/tex">i^{th}</script> entry contains the mean of probability distribution of <script type="math/tex">i^{th}</script> random variable and a covariance matrix <script type="math/tex">K</script> such that <script type="math/tex">K_{ij}=E[x_i.x_j]</script>. Taking the example of bivariate Gaussian  distribution of random variables <script type="math/tex">X_1</script> and <script type="math/tex">X_2</script>,</p>
+
+<p><img src="mg1.png" alt="image 4" class="center-image" /></p>
+
+<p>In case 1, <script type="math/tex">X_1</script> and <script type="math/tex">X_2</script> are independent of each other whereas in case 2, they are positively correlated.</p>
+
+<p><img src="Gaussian.png" alt="image 6" class="center-image" /></p>
+
+<p>If we have a joint gaussian distribution of <script type="math/tex">N</script> random variables , then the conditional probability of a subset of this <script type="math/tex">N</script> random variables will also follow gaussian distribution.</p>
+
+<p>From matrix manipulations it can be proved that for <script type="math/tex">P(X_2 \vert X_1 = x_1)</script></p>
+
+<script type="math/tex; mode=display">\mu = \mu_1 + \Sigma_{12}\Sigma^{-1}_{22}(x_2 - \mu_2)</script>
+
+<script type="math/tex; mode=display">\Sigma_{12} = \Sigma_{11} - \Sigma_{12}\Sigma_{22}</script>
+
+<p>where <script type="math/tex">\Sigma_{ij}</script> is equal to correlation between <script type="math/tex">X_i</script> and <script type="math/tex">X_j</script></p>
+
+<p><img src="pi1.png" alt="image 5" class="center-image" /></p>
+
+<p>Let, <script type="math/tex">F_1, F_2, F_3</script> be the functions that gives the correct output for training examples <script type="math/tex">x_1, x_2, x_3</script> respectvely. It is assumed that <script type="math/tex">F_1, F_2, F_3</script> will follow a joint Gaussian distribution and correlation between any 2 functions will be defined by the corresponding entry in the covariance matrix. The entries in the covariance matrix will be filled using some pre-decided kernel.</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{bmatrix}
+F_1 \\
+F_2 \\
+F_3
+\end{bmatrix} \sim \Bigg(
+\begin{bmatrix}
+0 \\
+0 \\
+0
+\end{bmatrix},
+\begin{bmatrix}
+K_{11}  & K_{12} & K_{13} \\
+K_{21}  & K_{22} & K_{23} \\
+K_{31}  & K_{32} & K_{33}
+\end{bmatrix}\Bigg). %]]></script>
+
+<p>The distribution defined by this covariance matrix is prior distribution of functions which will then be modified when training data is observed. For mathematical simplicity the mean function is taken to be zero.</p>
+
+<h1 id="kernel-design">Kernel Design</h1>
+
+<p>The choice of kernel, that is the covariance function determines almost all the generalization properties of a GP model. Therefore according to me choosing the kernel to model the problem is the most important step in gaussian processes.</p>
+
+<h3 id="squared-exponential-kernel">Squared Exponential Kernel</h3>
+
+<p>Formula for squared exponential kernel is <script type="math/tex">k_{SE} (x,x') = \sigma^2 exp\big( -\frac{(x - x')^2}{2l^2}\big)</script>. <script type="math/tex">\sigma^2</script> is the scaling parameter and <script type="math/tex">l</script> is lengthscale that determines the smoothness of the function.</p>
+
+<h3 id="rational-quadratic-kernel">Rational Quadratic Kernel</h3>
+
+<p>Formula for Rational Quadratic Kernel is <script type="math/tex">k_{RQ}(x, x') = \sigma^2\big( 1 + \frac{(x - x')^2}{2al^2}\big)^{-\alpha}</script>. This can be seen as a combination of many squared exponential kernels with different lenght scales added together. In this kernel different features of input space affect the smoothness property by different degree. The parameter <script type="math/tex">\alpha</script> determines the weightage given to small and large scale variations.</p>
+
+<h3 id="periodic-kernel">Periodic Kernel</h3>
+
+<p>Formula for Periodic Kernel is <script type="math/tex">k_{Per} (x, x') = \sigma^2  exp\big(-\frac{2sin^2(\pi\vert x - x'\vert /p)}{l^2}\big)</script>. This kernel is used to determine the covariance matrix of functions which follow repetition. Parameter <script type="math/tex">p</script> determines the distance between repetitions and lengthscale <script type="math/tex">l</script> determines the smoothness of function.</p>
+
+<h3 id="locally-periodic-kernel">Locally Periodic Kernel</h3>
+
+<p>Formula for Locally Periodic Kernel is <script type="math/tex">k_{LocalPer}(x, x') = k_{Per}(x, x')k_{SE}(x, x') = \sigma^2exp\big(-\frac{2sin^2(\pi\vert x - x'\vert /p)}{l^2}\big)exp\big(-\frac{(x-x')^2}{2l^2}\big)</script>. This kernel is for functions which are periodic but vary slowly over time as the distribution of the repeating part of function will change with the addition of squared exponential term.</p>
+
+<h1 id="prediction-with-noise-free-observations">Prediction with Noise-free Observations</h1>
+
+<p>Let the training dataset be of the form <script type="math/tex">\{(x^{(i)},f^{(i)})\vert i = 1,....,n\}</script>. The design matrix <script type="math/tex">X</script> consisting of all the training inputs will be of the dimension <script type="math/tex">D \times n</script>, where <script type="math/tex">D</script> is dimension of the input space. Let <script type="math/tex">f</script> denote the joint distribution of all the hypothesis functions corresponding the elements of the training set. The entries of covariance matrix of <script type="math/tex">f</script> will be filled with the use of a kernel. Similarly, the design matrix for test inputs <script type="math/tex">\{x^{(i)}_*\}^{n_*}_{i=1}</script> is defined as <script type="math/tex">X_*</script>.</p>
+
+<p>Let <script type="math/tex">f_*</script> be the hypothesis function that gives the output for test inputs. The joint distribution of <script type="math/tex">f</script> and <script type="math/tex">f_*</script> will be</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{bmatrix}
+f \\
+f_*
+\end{bmatrix} \sim \mathcal{N}\bigg(0, 
+\begin{bmatrix}
+K(X,X)  & K(X,X_*) \\
+K(X_*,X)  & K(X_*,X_*)
+\end{bmatrix}\bigg). %]]></script>
+
+<p>If there are <script type="math/tex">n</script> number of training inputs and <script type="math/tex">n_*</script> number of test inputs then</p>
+
+<ul>
+  <li><script type="math/tex">K(X, X)</script> denotes the covariance matrix of distribution <script type="math/tex">f</script> with dimension <script type="math/tex">n \times n</script>.</li>
+  <li><script type="math/tex">K(X, X_*)</script> denotes the covariance matrix of test points with training points and has dimension <script type="math/tex">n \times n_*</script>.</li>
+  <li><script type="math/tex">K(X_*, X_*)</script> denotes the covariance matrix of test points with themselves and has dimension <script type="math/tex">n_* \times n_*</script>.</li>
+  <li>The covariance matrix <script type="math/tex">K</script> of joint distribution <script type="math/tex">f</script> and <script type="math/tex">f_*</script> will thus have dimension <script type="math/tex">(n + n_*) \times (n + n_*)</script>.</li>
+</ul>
+
+<p>The covariance matrix <script type="math/tex">K</script> defines the prior distribution over functions. In-order to obtain the posterior distribution over function this joint distribution will be restricted to only those functions that agree with the observed outputs.</p>
+
+<p>Now, as discussed before, we can get the distribution of <script type="math/tex">f_*</script> given the Posterior distribution of <script type="math/tex">f</script> as</p>
+
+<script type="math/tex; mode=display">f_*\vert X_*,X,f \sim \mathcal{N}(K(X_*,X)K(X,X)^{-1}f,K(X_*,X_*)-K(X,X)^{-1}K(X,X_*)).</script>
+
+<p>The mean of distribution of <script type="math/tex">f_*</script> will be the output given for corresponding test points and the variance will tell how confident we are about the predictions. Small variance will represent more confidence while high variance will represent low confidence.</p>
+
+<h1 id="prediction-using-noisy-observations">Prediction using noisy observations</h1>
+
+<p>In Gaussian Process modeling, the covariance kernel chosen defines the prior distribution over functions. But this is not sufficient as the aim is that the hypothesis function can give the output for test points that the model has not yet seen.</p>
+
+<p>So far in the tutorial, the assumption has been that the Gaussian process model is noise free, that is the hypothesis functions didn’t have noise and thereby always gave the true value as output for the input in the training set. But now the model will be taking unmodeled effects and random noise into account which can be represented by <script type="math/tex">\epsilon</script>. <script type="math/tex">\epsilon</script> is now <script type="math/tex">IID</script> according to a Gaussian distribution.
+So now the function of evaluation will be noisy.</p>
+
+<script type="math/tex; mode=display">y = f(x) + \epsilon, where \> \epsilon \sim \mathcal{N} (0, \sigma ^2_y)</script>
+
+<p>In order to compute the <script type="math/tex">P(y\vert X)</script> we need to integrate over <script type="math/tex">f</script>.</p>
+
+<script type="math/tex; mode=display">p(y \vert X) = \int p(y \vert f,X)p(f \vert X)df</script>
+
+<script type="math/tex; mode=display">p(f \vert X) = \mathcal{N} (f \vert 0,K)</script>
+
+<p>Since all the data points are independent,</p>
+
+<script type="math/tex; mode=display">p(y \vert f) = \prod_i\mathcal{N} (y_i \vert f_i,\sigma ^2_y)</script>
+
+<p>Then, according to convolution theorem,</p>
+
+<script type="math/tex; mode=display">cov[y \vert X] = K + \sigma ^2_yI_N \triangleq K_y</script>
+
+<p>This shows that the distribution of the noisy function still has the same mean 0 but its covariance increases, i.e. we become less confident of the predictions.</p>
+
+<p>Earlier when the training data was noise free, then the uncertainty collapsed where there was data but now even where there is data, it is assumed that there will be an uncertainty of at least up to <script type="math/tex">\sigma ^2_y</script>. The earlier property also still holds that where there is data, there less uncertainty is there and vice versa.</p>
+
+<p>So now the joint distribution of observed target values and the function values at test inputs under the prior will be</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{bmatrix}
+y \\
+f_*
+\end{bmatrix} \sim \mathcal{N}\bigg(0, 
+\begin{bmatrix}
+K(X,X) + \sigma ^2_yI  & K(X,X_*) \\
+K(X_*,X)  & K(X_*,X_*)
+\end{bmatrix}\bigg). %]]></script>
+
+<p>Therefore, the conditional distribution of <script type="math/tex">f_*</script> will be</p>
+
+<p><script type="math/tex">f_*\vert X,y,X_* \sim \mathcal{N}(\hat{f_*},cov(f_*)),</script> where
+<script type="math/tex">\hat{f_*} \triangleq  E[f_*\vert X,y,X_*] = K(X_*,X)[K(X,X) + \sigma ^2_yI]^{-1}y,</script></p>
+
+<script type="math/tex; mode=display">cov(f_*) = K(X_*,X_*) - K(X_*,X)[K(X,X)+\sigma ^2_yI]^{-1}K(X,X_*).</script>
+
+<h1 id="gaussian-process-modeling">Gaussian Process Modeling</h1>
+
+<p><img src="gpdiagram.png" alt="image 7" class="center-image" /></p>
+
+<p>From the diagram it can be seen that for test point <script type="math/tex">X_*</script> we more confident about the output that we have predicted for it. Whereas for test point <script type="math/tex">X_{**}</script> we are less confident. The output will be the mean of the distribution for each test point.</p>
+
+<p>Since a function is just a mapping from input to output. In the figure the purple line can be thought as a function that takes the input <script type="math/tex">X</script> and returns mean and covariance of distribution of hypothesis function <script type="math/tex">F(X)</script> of <script type="math/tex">X</script>. Now, since there can be infinite inputs in the input space and for each input there will be a distribution of <script type="math/tex">F(X)</script> that will give the output for it, these infinite number of functions will constitute a joint multivariate Gaussian distribution as they will be correlated.</p>
+
+<p>Therefore a GP is a generalization of a Gaussian distribution to infinite dimensionality.</p>
+
+<p>Let real process f(x) be distributed by GP with mean m(x) and covariance k:</p>
+
+<script type="math/tex; mode=display">f(x) \sim GP(m(x), k(x,x'))</script>
+
+<script type="math/tex; mode=display">m(x) = E[f(x)]</script>
+
+<script type="math/tex; mode=display">k(x,x')=E[(f(x) - m(x))(f(x') - m(x'))]</script>
+
+<script type="math/tex; mode=display">k(x,x')=cov[f(x),f(x')]</script>
+
+<h1 id="deep-gaussian-process">Deep Gaussian Process</h1>
+
+<p>Neural Networks can learn very complex mappings from the inputs to outputs. When data is combined with any model, then that requires a predictive function and an objective function to define the cost of misprediction. Now uncertainty in prediction can arise from the scarcity of training data, a mismatch between the set of prediction functions chosen to define the model versus all possible prediction functions and uncertainties in the objective function. This tutorial will deal with the uncertainties that arise due to the choice of prediction functions. 
+Considering the case of neural network with 1 hidden layer, let</p>
+
+<script type="math/tex; mode=display">f(x) = w^{(2)^T}\phi (W_1, x)</script>
+
+<p>Here,</p>
+<ul>
+  <li><script type="math/tex">f(x)</script> is a scalar function with vector inputs</li>
+  <li><script type="math/tex">\phi</script> is an activation vector function with vector inputs</li>
+  <li>Elements of <script type="math/tex">W_1</script> are the parameters of first hidden layer. with dimensions of <script type="math/tex">W_1</script> being <script type="math/tex">d \times h</script>. Where <script type="math/tex">d</script> is the dimension of input and <script type="math/tex">h</script> is the dimension of the hidden layer.</li>
+  <li><script type="math/tex">w^{(2)}</script> is a <script type="math/tex">h \times 1</script> dimensional vector which maps the output of hidden layer to a scalar output</li>
+</ul>
+
+<p>According to the properties of univariate gaussian,</p>
+
+<ul>
+  <li>Sum of Gaussian variables is also Gaussian.</li>
+</ul>
+
+<script type="math/tex; mode=display">z_i \sim \mathcal{N}(\mu _i, \sigma ^2_i)</script>
+
+<script type="math/tex; mode=display">\sum ^n_{i=1} z_i \sim \mathcal{N}\bigg(\sum ^n_{i=1} \mu _i, \sum ^n_{i=1}\sigma ^2_i\bigg)</script>
+
+<ul>
+  <li>Scaling a Gaussian leads to a Gaussian</li>
+</ul>
+
+<script type="math/tex; mode=display">z \sim \mathcal{N}(\mu, \sigma^2)</script>
+
+<script type="math/tex; mode=display">v \sim \mathcal{N}(v\mu, v^2\sigma^2)</script>
+
+<p>Now by keeping <script type="math/tex">W_1</script> fixed,</p>
+
+<p>Let <script type="math/tex">x \sim \mathcal{N}(\mu , \Sigma)</script> Where <script type="math/tex">\mathcal{N}(\mu , \Sigma)</script> defines <script type="math/tex">P(x)</script>.</p>
+
+<p><script type="math/tex">y = W*x</script> which defines <script type="math/tex">P(y\vert x)</script>.</p>
+
+<p>Then we get <script type="math/tex">y \sim \mathcal{N}(w\mu, w\Sigma w^T)</script> where <script type="math/tex">\mathcal{N}(w\mu, w\Sigma w^T)</script> defines <script type="math/tex">P(y)</script>.</p>
+
+<p>As is observed that due to the properties of Gaussian processes it is trivial to calculate the marginal and joint distributions which otherwise would have included complex mathematical integration.</p>
+
+<p>Let, <script type="math/tex">\phi _{ij} = \phi (w^{(1)}_j, x_i)</script> where <script type="math/tex">x_i</script> is <script type="math/tex">i^{th}</script> data point and <script type="math/tex">w^{(1)}_j</script> is the <script type="math/tex">d \times 1</script> dimensional weight associated with <script type="math/tex">j^{th}</script> hidden unit.</p>
+
+<p>So, the designed matrix obtained is</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{bmatrix}
+\phi_{(1,1)}  & \phi_{(1,2)} & \dots & \phi_{(1,h)} \\
+\phi_{(2,1)}  & \phi_{(2,2)} & \dots & \phi_{(2,h)} \\
+\vdots & \vdots & \ddots & \vdots \\
+\phi_{(n,1)}  & \phi_{(n,2)} & \dots & \phi_{(n,h)} \\
+\end{bmatrix} %]]></script>
+
+<p>Now, representing the output of neural network in matrix form,</p>
+
+<p><script type="math/tex">y = \phi w + \epsilon \> where \> \epsilon \sim \mathcal{N}(0,\sigma^2)</script>.</p>
+
+<ul>
+  <li><script type="math/tex">y</script> is a <script type="math/tex">n \times 1</script> dimensional vector</li>
+  <li><script type="math/tex">\phi</script> is a <script type="math/tex">n \times h</script> dimensional matrix</li>
+  <li><script type="math/tex">w</script> is a <script type="math/tex">h \times 1</script> dimensional vector</li>
+  <li><script type="math/tex">\epsilon</script> is a <script type="math/tex">n \times 1</script> dimensional vector</li>
+</ul>
+
+<p>Now, let a probability distribution be defined over parameter set <script type="math/tex">w</script>.</p>
+
+<script type="math/tex; mode=display">w \sim \mathcal{N}(0, \alpha I)</script>
+
+<p>Then, according to rules of multivariate Gaussian distribution.</p>
+
+<script type="math/tex; mode=display">y \sim \mathcal{N}(0, \alpha \phi \phi^T + \sigma^2 I)</script>
+
+<p>The covariance function will be formed by inner products of rows of design matrix.</p>
+
+<script type="math/tex; mode=display">k_f(x_i,x_j) = \alpha \phi (W_1, x_i)^T\phi (W_1, x_j)</script>
+
+<h1 id="priors-for-infinite-networks">Priors for Infinite Networks</h1>
+
+<p>Theoritically, an infinite neural network i.e. Neural network that has infinite number of hidden layer units can reasonably be a non-parametric model since it will be able to learn very complex functions which maps inputs to outputs. It turns out that we can define priors for functions represented by hidden units if we define suitable priors for weights depending on the application. In practise the network will have sufficiently large finite number of hidden units which has characteristics close to that of an infinite network.</p>
+
+<script type="math/tex; mode=display">f_k(x) = b_k + \sum ^H_{j=1}v_{jk}h_j(x)</script>
+
+<script type="math/tex; mode=display">h_j(x) = tanh\big(a_j + \sum ^I_{i=1}u_{ij}x_i\big)</script>
+
+<p>Here,</p>
+<ul>
+  <li><script type="math/tex">u_{ij}</script> is the weights for computing the hidden layers outputs, <script type="math/tex">x_i</script> is the <script type="math/tex">i^{th}</script> input instance, <script type="math/tex">a_j</script> is the bias applied on the hidden layer units, <script type="math/tex">h_j</script> is the output of the <script type="math/tex">j^{th}</script> hidden unit. <script type="math/tex">tanh</script> is the acitvation function</li>
+  <li>Similarly, <script type="math/tex">v_{jk}</script> is the weights applied on the output from hidden layer <script type="math/tex">h_j</script>, <script type="math/tex">b_k</script> is the bias and <script type="math/tex">f_k</script> is the output of the <script type="math/tex">k^{th}</script> unit.</li>
+</ul>
+
+<p>The hidden to output weights, <script type="math/tex">v_{jk}</script>, output biases <script type="math/tex">b_k</script>, input to hidden weights <script type="math/tex">u_{ij}</script> and hidden unit biases <script type="math/tex">a_j</script> have Gaussian distributions with mean 0 and standard deviations <script type="math/tex">\sigma_v</script>, <script type="math/tex">\sigma_b</script>, <script type="math/tex">\sigma_u</script> and <script type="math/tex">\sigma_a</script> respectively.</p>
+
+<ul>
+  <li>The expected value of each hidden unit’s contribution in calculation of <script type="math/tex">f_k(x^{(1)})</script> is 0.
+<script type="math/tex">E[v_{jk}h_j(x^{(1)})] = E[v_{jk}]E[h_j(x^{(1)})] = 0</script> Since, <script type="math/tex">E[v_{jk}]</script> is 0 by hypothesis.</li>
+  <li>Variance of contribution of each hidden unit is finite
+<script type="math/tex">E[(v_{jk}h_j(x^{(1)})^2)] = E[v^2_{jk}]E[h_j(x^{(1)})^2] = \sigma^2_vE[h_j(x^{(1)})^2]</script> because output of hidden unit is bounded.</li>
+  <li>According to central limit theorem, for large <script type="math/tex">H</script>, Total contribution of hidden units to calculate <script type="math/tex">f_k(x^{(1)})</script> becomes gaussian and has variance <script type="math/tex">H\sigma^2_vV(x^{(1)})</script>.</li>
+  <li>Prior distribution of <script type="math/tex">f_k(x^{(1)})</script> has variance <script type="math/tex">\sigma^2_b + H\sigma^2_vV(x^{(1)})</script>.</li>
+  <li>Theoretically when number of hidden units tend to infinity, then we can set <script type="math/tex">\sigma_v = w_vH^{\frac{-1}{2}}</script> for some fixed <script type="math/tex">w_v</script>.
+The prior for <script type="math/tex">f_k(x^{(1)})</script> then has mean 0 and variance <script type="math/tex">\sigma^2_b + w^2_vV(x^{(1)})</script></li>
+  <li>we can thus obtain multi-variate joint distribution of <script type="math/tex">f_k(x^{(1)}), ...., f_k(x^{(n)})</script> with mean 0 and each entry in covariance matrix defined as 
+<script type="math/tex">E[f_x(x^{(p)})f_k(x^{(q)})] = \sigma^2_b + \sum_j \sigma^2_vE[h_j(x^{(p)})h_j(x^{(q)})]</script>
+<script type="math/tex">E[f_x(x^{(p)})f_k(x^{(q)})] = \sigma^2_b + w^2_vC(x^{(p)},x^{(q)})</script>
+where <script type="math/tex">C(x^{(p)},x^{(q)}) = E[h_j(x^{(p)})h_j(x^{(q)})]</script></li>
+</ul>
+
+<h1 id="experiments">Experiments</h1>
+
+<h3 id="effect-of-kernel-width-parameter-and-visualization-of-prior-and-posterior-distribution-samples">Effect of Kernel width parameter and visualization of prior and posterior distribution samples.</h3>
+
+<p>Low value of kernel width parameter tells that we only want to be similar to things that are close by and vice-versa. so when <script type="math/tex">l^2</script> is small, we get a wiggly function as opposed to when <script type="math/tex">l^2</script> is large, we get a smooth function. In the plots the true function is red and the predictions are in blue.</p>
+
+<ul>
+  <li>For <script type="math/tex">l^2 = 0.1</script> the results are as follows</li>
+</ul>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="Figure_11.png" alt="image 8" class="center-image" /></td>
+      <td><img src="Figure_21.png" alt="image 9" class="center-image" /></td>
+      <td><img src="Figure_31.png" alt="image 10" class="center-image" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>For <script type="math/tex">l^2 = 1</script> the results are as follows</li>
+</ul>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="l2is1.png" alt="image 8" class="center-image" /></td>
+      <td><img src="figg1.png" alt="image 9" class="center-image" /></td>
+      <td><img src="Figg2.png" alt="image 10" class="center-image" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<ul>
+  <li>For <script type="math/tex">l^2 = 10</script> the results are as follows</li>
+</ul>
+
+<table>
+  <tbody>
+    <tr>
+      <td><img src="Figure_1.png" alt="image 8" class="center-image" /></td>
+      <td><img src="Figure_2.png" alt="image 9" class="center-image" /></td>
+      <td><img src="Figure_3.png" alt="image 10" class="center-image" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="comparison-of-gaussian-process-regression-and-linear-regression">Comparison of Gaussian process regression and Linear Regression.</h3>
+
+<p>In this experiment linear regression was performed on the abelone dataset provided by stanford and stored the Mean Squared Error. This MSE of linear regression was then compared with the results of Gaussian process regression. The hyper parameters for the Gaussian process regression was obtained by performing a grid search. Finally Gaussian process regression performed better then linear regression on a particular choice of hyperparameter.</p>
+
+<script type="math/tex; mode=display">Gaussian Process Regression (MSE) = 4.703</script>
+
+<script type="math/tex; mode=display">Linear Regression (MSE) = 4.988</script>
+
+<p>In the table below results of Gaussian Process regression with different sigma and L parameters are represented.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">sigma</th>
+      <th style="text-align: left">L parameter</th>
+      <th style="text-align: left">GPR</th>
+      <th style="text-align: left">LR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">21.947</td>
+      <td style="text-align: left">11.473</td>
+      <td style="text-align: left">4.703</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">32.421</td>
+      <td style="text-align: left">21.947</td>
+      <td style="text-align: left">4.812</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">105.736</td>
+      <td style="text-align: left">63.842</td>
+      <td style="text-align: left">4.893</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">53.368</td>
+      <td style="text-align: left">116.21</td>
+      <td style="text-align: left">5.000</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">42.894</td>
+      <td style="text-align: left">158.105</td>
+      <td style="text-align: left">5.131</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">11.473</td>
+      <td style="text-align: left">200</td>
+      <td style="text-align: left">6.012</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">1</td>
+      <td style="text-align: left">32.421</td>
+      <td style="text-align: left">6.638</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">1</td>
+      <td style="text-align: left">1</td>
+      <td style="text-align: left">7.39</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">189.526</td>
+      <td style="text-align: left">1</td>
+      <td style="text-align: left">45.846</td>
+      <td style="text-align: left">4.988</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="comparison-of-gaussian-process-classification-and-logistic-regression">Comparison of Gaussian process classification and Logistic Regression</h3>
+
+<p>In this experiment logistic regression was performed on the Iris Dataset and accuracy was computed. This accuracy of Logistic regression was then compared with the accuracy obtained by Gaussian process classification on the same dataset. The results obtained are as following</p>
+
+<script type="math/tex; mode=display">Gaussian Process Classification (Accuracy) = 98\%</script>
+
+<script type="math/tex; mode=display">Logistic Regression (Accuracy) = 97\%</script>
+
+<h1 id="references">References</h1>
+
+<p><a href="https://www.youtube.com/watch?v=ewJ3AxKclOg&amp;t=3118s">Neil Lawrence: Introduction to Gaussian Processess</a></p>
+
+<p><a href="http://www.stat.cmu.edu/~larry/=stat705/">Intermediate Statistics Course</a></p>
+
+<p><a href="http://www.gaussianprocess.org/gpml/chapters/RW.pdf">Gaussian Processes for Machine Learning </a></p>
+
+<p><a href="http://ml.dcs.shef.ac.uk/gpss/gpws14/">Gaussian Process Summer School</a></p>
+
+<p><a href="https://arxiv.org/pdf/1711.00165.pdf">Deep Neural Networks as Gaussian Processes</a></p>
+
+
+      <footer class="site-footer">
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  </body>
+</html>
